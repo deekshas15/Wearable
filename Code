@@ -1,4 +1,7 @@
 // Declaring Pins
+#include<LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 const int buzzerPin = 8;
 const int ledPin = 6;
 const int pir_motionPin = 7;
@@ -14,6 +17,7 @@ long interval = 100; // Interval at which LED blinks
 void setup()
 {
 Serial.begin(9600);
+lcd.begin(16, 2); 
 pinMode(lm35_pin,INPUT);
 //The Following are our output
 pinMode(ledPin,OUTPUT);
@@ -39,6 +43,8 @@ distance = (duration/2) / 29.1;
 if (digitalRead(pir_motionPin) && (distance <= 50 && distance >= 0)) {
 //human inside 0.5 meter range
 buzzer_mode = true;
+  lcd.setCursor(1,0);          
+  lcd.print("Watch Out");
 }
 // If alarm mode is on,blink our LED
 if (buzzer_mode){
@@ -68,6 +74,8 @@ temp_adc_val = analogRead(lm35_pin); /* Read Temperature */
 temp_val = (temp_adc_val * 4.88); /* Convert adc value to equivalent voltage */
 temp_val = (temp_val/10); /* LM35 gives output of 10mv/°C */
 Serial.print("Temperature = ");
+  lcd.setCursor(0,0);          
+  lcd.print(temp_val);
 Serial.print(temp_val);
 Serial.print(" Degree Celsius\n");
 delay(60);
