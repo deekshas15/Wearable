@@ -1,0 +1,74 @@
+// Declaring Pins
+const int buzzerPin = 8;
+const int ledPin = 6;
+const int pir_motionPin = 7;
+const int ultra_echoPin = 9;
+const int ultra_trigPin = 10;
+const int lm35_pin = A1;
+// Setting Buzzer mode to False
+boolean buzzer_mode = false;
+// For LED
+int ledState = LOW;
+long previousMillis = 0;
+long interval = 100; // Interval at which LED blinks
+void setup()
+{
+Serial.begin(9600);
+pinMode(lm35_pin,INPUT);
+//The Following are our output
+pinMode(ledPin,OUTPUT);
+pinMode(buzzerPin,OUTPUT);
+pinMode(ultra_trigPin, OUTPUT); // trig pin will have pulses output
+//Button is our Input
+pinMode(pir_motionPin, INPUT);
+pinMode(ultra_echoPin, INPUT); // echo pin should be input to get pulse width
+// Wait before starting the alarm
+delay(1000);
+}
+void loop()
+{
+int duration, distance;
+//ultrasonic sensor acts as ray emmitter
+digitalWrite(ultra_trigPin, HIGH);
+delay(1);
+digitalWrite(ultra_trigPin, LOW);
+//ultrasonic sensor catches the emmitted ray
+duration = pulseIn(ultra_echoPin, HIGH);
+distance = (duration/2) / 29.1;
+// To chech whether the motion inside the range is detected or not
+if (digitalRead(pir_motionPin) && (distance <= 50 && distance >= 0)) {
+//human inside 0.5 meter range
+buzzer_mode = true;
+}
+// If alarm mode is on,blink our LED
+if (buzzer_mode){
+unsigned long currentMillis = millis();
+if(currentMillis - previousMillis > interval) {
+previousMillis = currentMillis;
+if (ledState == LOW)
+ledState = HIGH;
+else
+ledState = LOW;
+// Switch the LED
+digitalWrite(ledPin, ledState);
+}
+tone(buzzerPin, 1000);
+}
+
+// If alarm is off
+if (buzzer_mode == false) {
+// No tone & LED off
+noTone(buzzerPin);
+digitalWrite(ledPin, LOW);
+}
+else {buzzer_mode = false;}
+int temp_adc_val;
+float temp_val;
+temp_adc_val = analogRead(lm35_pin); /* Read Temperature */
+temp_val = (temp_adc_val * 4.88); /* Convert adc value to equivalent voltage */
+temp_val = (temp_val/10); /* LM35 gives output of 10mv/°C */
+Serial.print("Temperature = ");
+Serial.print(temp_val);
+Serial.print(" Degree Celsius\n");
+delay(60);
+}
